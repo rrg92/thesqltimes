@@ -1,5 +1,5 @@
 SELECT
-	--Registro
+	Registro,
 
 	-- Colunas Fixas!
 	Id				=  CONVERT(int,CONVERT(binary(4),REVERSE(SUBSTRING(Registro,5,4))))
@@ -17,9 +17,10 @@ SELECT
 	,Codigo			= IIF( Col6Null = 1,NULL,CONVERT(int,CONVERT(binary(8),REVERSE(SUBSTRING(Registro,19,8)))))					
 	
 	-- Agora, colunas variáveis!
-
+	
 	,Nome		= CONVERT(varchar(100),SUBSTRING(Registro,VarStart,Col1Off-VarStart+1))
 	,Sobrenome	= IIF( Col7Null = 1, null,CONVERT(varchar(100),SUBSTRING(Registro,Col1Off+1,Col2Off-Col1Off)))
+	,VarStart
 FROM
 	LogDeletes 
 	CROSS APPLY
@@ -48,7 +49,7 @@ FROM
 	CROSS APPLY
 	(
 		SELECT	
-			 VarStart	= 32+VarCount*2 -- 32 = inicio do var count  +   | *2 = 2 bytes por coluna variável.
+			 VarStart	= 32+VarCount*2 -- 32(inicio do var offset) + 2 bytes por coluna variável.
 			,Col1Off	= CONVERT(smallint,CONVERT(binary(2),REVERSE(SUBSTRING(Registro,32,2))))
 			,Col2Off	= CONVERT(smallint,CONVERT(binary(2),REVERSE(SUBSTRING(Registro,34,2))))
 	) V
